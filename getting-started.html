@@ -20,7 +20,11 @@ var myFunc = gpu.createKernel(function() {
 
 var output = myFunc();
 
-var myData = new Float32Array([0, 1, 2, 3, 4 ,5 ,6, 7, 8, 9]);
+//test with GPU.js
+
+//start benchmark
+var start = new Date();
+var myData = new Float32Array(10000000);//[0, 1, 2, 3, 4 ,5 ,6, 7, 8, 9]
     
 // Kernal is compiled and each thread runs this program
 // This function gets run at the same time from every thread
@@ -37,11 +41,39 @@ var addOneSimdGPU = gpu.createKernel(function (data) {
 	// Return our answer for the output[this.thread.x]
 	return myData; 
 }).dimensions([myData.length]);
- 
 
-console.log(myData);
 console.log(addOneSimdGPU(myData));
 
+//stop benchmark
+var end = new Date();
+
+//print result
+console.log('with GPU.js: '+(end-start)+'ms');
+console.log(myData);
+
+//test without GPU.js
+
+//start benchmark
+var start = new Date();
+var myData = new Float32Array(10000000);//[0, 1, 2, 3, 4 ,5 ,6, 7, 8, 9]
+var addOneSimd = function(data) {
+	var data = data.slice(0);
+	for(var i=0;i<10000000;++i) {
+	var currentThreadId = i;
+
+	data[currentThreadId]+=1;
+	}
+	return data;
+}
+
+console.log(addOneSimd(myData));
+
+//stop benchmark
+var end = new Date();
+
+//print result
+console.log('without GPU.js: '+(end-start)+'ms');
+console.log(myData);
 
 </script>
 </body>
