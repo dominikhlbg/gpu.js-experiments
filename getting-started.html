@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>GPU.js experiments</title>
+<script src="gpu.js"></script>
+</head>
+
+<body>
+<script>
+var gpu = new GPU();
+
+var opt = {
+    dimensions: [100]
+};
+
+var myFunc = gpu.createKernel(function() {
+    return this.thread.x;
+}, opt);
+
+var output = myFunc();
+
+console.log(output);
+</script>
+</body>
+</html>
