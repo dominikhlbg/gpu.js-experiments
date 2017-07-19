@@ -20,7 +20,29 @@ var myFunc = gpu.createKernel(function() {
 
 var output = myFunc();
 
-console.log(output);
+var myData = new Float32Array([0, 1, 2, 3, 4 ,5 ,6, 7, 8, 9]);
+    
+// Kernal is compiled and each thread runs this program
+// This function gets run at the same time from every thread
+var addOneSimdGPU = gpu.createKernel(function (data) {
+	// first step is to get our current thread id
+	var currentThreadId = this.thread.x;
+
+	// you can't do in place opperations, so first get our data
+	var myData = data[currentThreadId];
+
+	// now do calculations
+	myData+=1;
+
+	// Return our answer for the output[this.thread.x]
+	return myData; 
+}).dimensions([myData.length]);
+ 
+
+console.log(myData);
+console.log(addOneSimdGPU(myData));
+
+
 </script>
 </body>
 </html>
