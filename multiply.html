@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>GPU.js experiments</title>
+<script src="http://gpu.rocks/js/gpu-core.min.js"></script>
+<script src="http://gpu.rocks/js/gpu.min.js"></script>
+</head>
+
+<body>
+<script>
+var gpu = new GPU({
+	'mode': 'gpu'
+});
+var cpu = new GPU({
+	'mode': 'cpu'
+});
+
+function splitArray(array, part) {
+	var tmp = [];
+	for(var i = 0; i < array.length; i += part) {
+		tmp.push(array.slice(i, i + part));
+	}
+	return tmp;
+}
+
+//
+// Startup code
+//
+var mat_size = 512;
+var A = [];
+var B = [];
+for(var n = 0; n < mat_size*mat_size; n++) {
+	var randA = Math.random();
+	var randB = Math.random();
+	A.push(randA);
+	B.push(randB);
+}
+A = splitArray(A, mat_size);
+B = splitArray(B, mat_size);
+
+function createMultFromGPU(gpu) {
+	var opt = {
+		dimensions: [mat_size, mat_size]
+	};
+
+	return gpu.createKernel(function(A, B) {
+		var sum = 0;
+		for (var i=0; i<512; i++) {
+			sum += A[this.thread.y][i] * B[i][this.thread.x];
+		}
+		return sum;
+	}, opt);
+}
+
+//start benchmark
+var start = new Date();
+
+console.log(createMultFromGPU(gpu)(A, B));
+
+//stop benchmark
+var end = new Date();
+
+//print result
+document.body.innerHTML+='<div>gpu: '+(end-start)+'ms</div>';
+
+//start benchmark
+var start = new Date();
+
+console.log(createMultFromGPU(cpu)(A, B));
+
+//stop benchmark
+var end = new Date();
+
+//print result
+document.body.innerHTML+='<div>cpu: '+(end-start)+'ms</div>';
+
+</script>
+</body>
+</html>
